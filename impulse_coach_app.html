@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impulse GD Coaching</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --gold:#C9A84C;--gold-light:#E8C96A;--gold-dim:#8B6D2E;
+    --black:#0A0A0A;--dark:#141414;--dark2:#1E1E1E;--dark3:#2A2A2A;
+    --white:#F5F0E8;--white-dim:rgba(245,240,232,0.6);--white-faint:rgba(245,240,232,0.1);
+    --green:#4CAF7D;--amber:#E8A020;--red:#E85050;
+    --radius:10px;--radius-lg:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--white);min-height:100vh;}
+  .top-bar{position:fixed;top:0;left:0;right:0;height:56px;background:var(--dark);border-bottom:1px solid rgba(201,168,76,0.15);display:flex;align-items:center;padding:0 16px;z-index:100;justify-content:space-between;}
+  .top-bar .brand{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);letter-spacing:2px;}
+  .top-bar .sub{font-size:9px;color:var(--white-dim);letter-spacing:2px;text-transform:uppercase;}
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:64px;background:var(--dark);border-top:1px solid rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:space-around;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 20px;cursor:pointer;font-size:10px;color:var(--white-dim);transition:all 0.2s;border:none;background:none;letter-spacing:0.5px;text-transform:uppercase;}
+  .nav-item.active{color:var(--gold);}
+  .nav-item svg{width:22px;height:22px;}
+  .main{margin-left:0;min-height:100vh;padding:76px 16px 84px;}
+  .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+  .page-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--white);}
+  .page-title span{color:var(--gold);}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all 0.2s;}
+  .btn-gold{background:var(--gold);color:var(--black);}
+  .btn-gold:hover{background:var(--gold-light);}
+  .btn-outline{background:none;border:1px solid rgba(201,168,76,0.3);color:var(--gold);}
+  .btn-ghost{background:none;border:1px solid rgba(245,240,232,0.1);color:var(--white-dim);}
+  .btn-red{background:none;border:1px solid rgba(232,80,80,0.3);color:var(--red);font-size:11px;padding:5px 10px;}
+  .card{background:var(--dark2);border:1px solid rgba(245,240,232,0.06);border-radius:var(--radius-lg);padding:16px;}
+  .metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;}
+  .metric{background:var(--dark2);border:1px solid rgba(245,240,232,0.06);border-radius:var(--radius-lg);padding:16px;}
+  .metric .label{font-size:10px;color:var(--white-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
+  .metric .value{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--white);letter-spacing:1px;line-height:1;}
+  .metric .value.gold{color:var(--gold);}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--white-dim);padding:8px 10px;text-align:left;border-bottom:1px solid rgba(245,240,232,0.06);}
+  tbody tr{border-bottom:1px solid rgba(245,240,232,0.04);transition:background 0.15s;}
+  tbody tr:hover{background:var(--white-faint);}
+  tbody td{padding:11px 10px;color:var(--white);font-size:13px;}
+  .avatar-sm{width:32px;height:32px;border-radius:50%;background:rgba(201,168,76,0.15);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--gold);}
+  .badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;}
+  .badge-green{background:rgba(76,175,125,0.15);color:var(--green);}
+  .badge-amber{background:rgba(232,160,32,0.15);color:var(--amber);}
+  .badge-red{background:rgba(232,80,80,0.15);color:var(--red);}
+  .badge-normal{background:rgba(76,175,125,0.15);color:var(--green);}
+  .badge-eleve{background:rgba(232,80,80,0.15);color:var(--red);}
+  .badge-standard{background:rgba(201,168,76,0.15);color:var(--gold);}
+  .form-grid{display:grid;grid-template-columns:1fr;gap:12px;}@media(min-width:500px){.form-grid{grid-template-columns:1fr 1fr;}}
+  .form-grid-3{display:grid;grid-template-columns:1fr 1fr;gap:12px;}@media(min-width:500px){.form-grid-3{grid-template-columns:1fr 1fr 1fr;}}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--white-dim);}
+  .field input,.field select,.field textarea{background:var(--dark3);border:1px solid rgba(245,240,232,0.1);border-radius:var(--radius);color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;transition:border-color 0.2s;outline:none;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);}
+  .field select option{background:var(--dark3);}
+  .field textarea{resize:vertical;min-height:72px;}
+  .form-section{margin-bottom:22px;}
+  .form-section-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  .form-section-title::after{content:'';flex:1;height:1px;background:rgba(201,168,76,0.2);}
+  .field-full{grid-column:1/-1;}
+  .page{display:none;}
+  .page.active{display:block;}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
+  .modal-bg.open{display:flex;}
+  .modal{background:var(--dark);border:1px solid rgba(201,168,76,0.2);border-radius:var(--radius-lg);width:100%;max-width:680px;padding:24px;margin:auto;}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+  .modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--gold);}
+  .modal-close{background:none;border:none;color:var(--white-dim);cursor:pointer;font-size:20px;}
+  .notif{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--dark2);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius);padding:12px 20px;font-size:13px;color:var(--white);z-index:999;display:none;white-space:nowrap;}
+  .notif.show{display:block;}
+  .ai-loading{display:none;align-items:center;gap:10px;padding:12px;background:rgba(201,168,76,0.06);border-radius:var(--radius);border:1px solid rgba(201,168,76,0.15);margin-top:8px;font-size:13px;color:var(--gold);}
+  .ai-loading.show{display:flex;}
+  .spinner{width:16px;height:16px;border:2px solid rgba(201,168,76,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .empty-state{text-align:center;padding:48px 20px;color:var(--white-dim);}
+  .empty-state .icon{font-size:36px;margin-bottom:10px;opacity:0.4;}
+  .empty-state p{font-size:13px;}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.2);border-radius:3px;}
+  /* CLIENT CARD */
+  .client-card{background:var(--dark2);border:1px solid rgba(245,240,232,0.06);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;}
+  .client-card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+  .client-card-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  /* SEANCE BTN */
+  .btn-seance{background:rgba(76,175,125,0.12);border:1px solid rgba(76,175,125,0.3);color:var(--green);font-size:11px;padding:5px 10px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;}
+  .btn-seance:hover{background:rgba(76,175,125,0.2);}
+  /* CHART */
+  .chart-wrap{position:relative;height:200px;margin-top:16px;}
+  /* DETAIL PAGE */
+  .back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--gold);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-bottom:16px;padding:0;}
+  .tabs{display:flex;gap:0;border-bottom:1px solid rgba(245,240,232,0.08);margin-bottom:20px;}
+  .tab-btn{padding:10px 16px;font-size:13px;font-family:'DM Sans',sans-serif;background:none;border:none;color:var(--white-dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;}
+  .tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <div class="brand">IMPULSE GD</div>
+    <div class="sub">Coaching App</div>
+  </div>
+  <button class="btn btn-gold" style="font-size:12px;padding:7px 13px;" onclick="openModal('modal-client')">+ Client</button>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div class="page-title">Tableau de <span>bord</span></div>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="label">Clients actifs</div><div class="value gold" id="stat-clients">0</div></div>
+      <div class="metric"><div class="label">Bilans réalisés</div><div class="value" id="stat-bilans">0</div></div>
+      <div class="metric"><div class="label">CA total</div><div class="value gold" id="stat-ca">0€</div></div>
+      <div class="metric"><div class="label">Impayés</div><div class="value" id="stat-impayes" style="color:var(--red)">0€</div></div>
+    </div>
+    <div id="dashboard-alerts"></div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:500;">Clients récents</div>
+        <button class="btn btn-ghost" onclick="showPage('clients')" style="font-size:11px;padding:5px 10px;">Voir tous →</button>
+      </div>
+      <div id="dashboard-list"></div>
+    </div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div class="page" id="page-clients">
+    <div class="page-header">
+      <div class="page-title">Mes <span>clients</span></div>
+      <button class="btn btn-gold" onclick="openModal('modal-client')" style="font-size:12px;padding:7px 13px;">+ Nouveau</button>
+    </div>
+    <div style="position:relative;margin-bottom:16px;">
+      <input type="text" id="search-clients" oninput="filterClients(this.value)" placeholder="🔍  Rechercher un client..." style="width:100%;background:var(--dark2);border:1px solid rgba(201,168,76,0.2);border-radius:var(--radius);color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px;outline:none;">
+    </div>
+    <div id="clients-list"></div>
+  </div>
+
+  <!-- CLIENT DETAIL -->
+  <div class="page" id="page-client-detail">
+    <button class="back-btn" onclick="showPage('clients')">← Retour</button>
+    <div id="client-detail-content"></div>
+  </div>
+
+  <!-- BILANS -->
+  <div class="page" id="page-bilans">
+    <div class="page-header">
+      <div class="page-title">Bilans <span>corporels</span></div>
+      <button class="btn btn-gold" onclick="openModal('modal-bilan')" style="font-size:12px;padding:7px 13px;">+ Nouveau</button>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Client</th><th>Date</th><th>Poids</th><th>IMC</th><th>PDF</th></tr></thead>
+          <tbody id="bilans-table"><tr><td colspan="5"><div class="empty-state"><div class="icon">◎</div><p>Aucun bilan</p></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="9" height="9" rx="2" fill="currentColor"/><rect x="13" y="2" width="9" height="9" rx="2" fill="currentColor" opacity=".4"/><rect x="2" y="13" width="9" height="9" rx="2" fill="currentColor" opacity=".4"/><rect x="13" y="13" width="9" height="9" rx="2" fill="currentColor" opacity=".4"/></svg>
+    Accueil
+  </button>
+  <button class="nav-item" id="nav-clients" onclick="showPage('clients')">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    Clients
+  </button>
+  <button class="nav-item" id="nav-bilans" onclick="showPage('bilans')">
+    <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="none"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Bilans
+  </button>
+</nav>
+
+<!-- MODAL CLIENT (création + édition) -->
+<div class="modal-bg" id="modal-client">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-client-title">Nouveau client</div>
+      <button class="modal-close" onclick="closeModal('modal-client')">✕</button>
+    </div>
+    <form onsubmit="saveClient(event)">
+      <input type="hidden" id="c-id">
+      <div class="form-section">
+        <div class="form-section-title">Identité</div>
+        <div class="form-grid">
+          <div class="field"><label>Prénom *</label><input type="text" id="c-prenom" required placeholder="Marie"></div>
+          <div class="field"><label>Nom *</label><input type="text" id="c-nom" required placeholder="Dupont"></div>
+          <div class="field"><label>Date de naissance</label><input type="date" id="c-ddn"></div>
+          <div class="field"><label>Sexe</label><select id="c-sexe"><option value="">—</option><option value="Homme">Homme</option><option value="Femme">Femme</option></select></div>
+          <div class="field"><label>Téléphone</label><input type="text" id="c-tel" placeholder="06 12 34 56 78"></div>
+          <div class="field"><label>Email</label><input type="email" id="c-email" placeholder="marie@email.com"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Coaching</div>
+        <div class="form-grid">
+          <div class="field"><label>Taille (cm)</label><input type="number" id="c-taille" placeholder="170"></div>
+          <div class="field"><label>Taille combinaison EMS</label><select id="c-combi"><option value="">—</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select></div>
+          <div class="field"><label>Objectif</label><select id="c-objectif"><option value="">—</option><option>Perte de poids</option><option>Prise de masse</option><option>Remise en forme</option><option>Performance sportive</option><option>Rééducation</option></select></div>
+          <div class="field"><label>Abonnement</label><select id="c-abo"><option value="">—</option><option>8 séances/mois</option><option>12 séances/mois</option><option>Séances à l'unité</option></select></div>
+          <div class="field"><label>Nb séances total</label><input type="number" id="c-seances" placeholder="12"></div>
+          <div class="field"><label>Prix du pack (€)</label><input type="number" id="c-prix-pack" placeholder="500"></div>
+          <div class="field"><label>Tarif/séance (€)</label><input type="number" id="c-tarif" placeholder="60"></div>
+          <div class="field"><label>Reste dû (€)</label><input type="number" id="c-du" placeholder="0" value="0"></div>
+          <div class="field"><label>Date début abonnement</label><input type="date" id="c-debut-abo"></div>
+          <div class="field"><label>Mode de règlement</label><select id="c-reglement"><option value="">—</option><option>CB</option><option>Virement</option><option>Espèces</option><option>Chèque</option></select></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Administratif</div>
+        <div class="form-grid">
+          <div class="field field-full"><label>Adresse postale</label><input type="text" id="c-adresse" placeholder="12 rue des Lilas, 75001 Paris"></div>
+          <div class="field"><label>N° pièce d'identité</label><input type="text" id="c-piece-id" placeholder="Champ libre"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Notes</div>
+        <div class="form-grid">
+          <div class="field field-full"><label>Pathologies</label><textarea id="c-patho" placeholder="Ex: hernie discale..."></textarea></div>
+          <div class="field field-full"><label>Notes</label><textarea id="c-notes" placeholder="Observations..."></textarea></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-client')">Annuler</button>
+        <button type="submit" class="btn btn-gold" id="btn-save-client">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL BILAN -->
+<div class="modal-bg" id="modal-bilan">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nouveau bilan</div>
+      <button class="modal-close" onclick="closeModal('modal-bilan')">✕</button>
+    </div>
+    <form onsubmit="saveBilan(event)">
+      <div class="form-section">
+        <div class="form-section-title">Informations</div>
+        <div class="form-grid">
+          <div class="field"><label>Client *</label><select id="b-client" required><option value="">Sélectionner...</option></select></div>
+          <div class="field"><label>Date *</label><input type="date" id="b-date" required></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Paramètres de base</div>
+        <div class="form-grid-3">
+          <div class="field"><label>Poids (kg)</label><input type="number" step="0.1" id="b-poids" placeholder="82.9" oninput="calcIMC()"></div>
+          <div class="field"><label>IMC</label><input type="number" step="0.1" id="b-imc" placeholder="Auto"></div>
+          <div class="field"><label>Âge du corps</label><input type="number" id="b-age-corps" placeholder="59"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Composition corporelle</div>
+        <div class="form-grid-3">
+          <div class="field"><label>Graisse corp. (%)</label><input type="number" step="0.1" id="b-gr-corp" placeholder="22.5"></div>
+          <div class="field"><label>Eau corp. (%)</label><input type="number" step="0.1" id="b-eau" placeholder="53.7"></div>
+          <div class="field"><label>Musc. squelettiques (%)</label><input type="number" step="0.1" id="b-musc-skel" placeholder="48.1"></div>
+          <div class="field"><label>Os (%)</label><input type="number" step="0.1" id="b-os" placeholder="4.0"></div>
+          <div class="field"><label>Protéines (%)</label><input type="number" step="0.1" id="b-prot" placeholder="19.8"></div>
+          <div class="field"><label>Muscles (%)</label><input type="number" step="0.1" id="b-musc" placeholder="73.5"></div>
+          <div class="field"><label>Graisse viscérale</label><input type="number" step="0.1" id="b-gr-visc" placeholder="11"></div>
+          <div class="field"><label>Gr. sous-cutanée (kg)</label><input type="number" step="0.1" id="b-gr-sous" placeholder="16.7"></div>
+          <div class="field"><label>Masse musc. maigre (kg)</label><input type="number" step="0.1" id="b-masse-musc" placeholder="64.2"></div>
+          <div class="field"><label>Somatotype</label><input type="text" id="b-somato" placeholder="Standard"></div>
+          <div class="field"><label>RMC (Kcal)</label><input type="number" id="b-rmc" placeholder="1769"></div>
+          <div class="field"><label>AMR (Kcal)</label><input type="number" id="b-amr" placeholder="2742"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Plan d'action</div>
+        <div class="form-grid">
+          <div class="field"><label>Séances / semaine</label><input type="number" id="b-seances-sem" placeholder="1"></div>
+          <div class="field"><label>Type d'entraînement</label><input type="text" id="b-type-entr" placeholder="Renforcement, Cardio..."></div>
+          <div class="field field-full">
+            <label>Analyse & observations</label>
+            <textarea id="b-analyse" placeholder="Analyse libre du bilan, observations, points forts, points à améliorer..." style="min-height:120px;"></textarea>
+          </div>
+          <div class="field field-full">
+            <label>Recommandations personnalisées</label>
+            <textarea id="b-recomm" placeholder="Laissez vide pour générer par IA..." style="min-height:100px;"></textarea>
+            <div class="ai-loading" id="ai-loader"><div class="spinner"></div> Génération IA en cours...</div>
+          </div>
+          <div class="field field-full">
+            <label>Suggestions séance EMS</label>
+            <textarea id="b-ems" placeholder="Laissez vide pour générer par IA..." style="min-height:90px;"></textarea>
+            <div class="ai-loading" id="ai-loader-ems"><div class="spinner"></div> Génération suggestions EMS...</div>
+          </div>
+          <div class="field field-full"><label>Prochain bilan dans</label><input type="text" id="b-prochain" placeholder="1 mois"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-bilan')">Annuler</button>
+        <button type="button" class="btn btn-outline" onclick="genAIRecommandations()" style="font-size:12px;">✦ Recommandations IA</button>
+        <button type="button" class="btn btn-outline" onclick="genEMSSuggestions()" style="font-size:12px;">⚡ Séance EMS IA</button>
+        <button type="submit" class="btn btn-gold">Enregistrer + PDF</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+const SUPA_URL='https://hmewshclyvnfvosaomji.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtZXdzaGNseXZuZnZvc2FvbWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTI3MDksImV4cCI6MjA5MjU4ODcwOX0.YuAmomKZH1hTdwOpnhl66yzAVysUytRYZij-LxJR5JE';
+const ANTH_KEY='';
+let clients=[], bilans=[], chartInstance=null;
+
+async function supaFetch(table,method='GET',body=null,filter=''){
+  const url=`${SUPA_URL}/rest/v1/${table}${filter}`;
+  const opts={method,headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''}};
+  if(body) opts.body=JSON.stringify(body);
+  const res=await fetch(url,opts);
+  if(!res.ok){const e=await res.text();throw new Error(e);}
+  if(method==='DELETE'||method==='PATCH') return null;
+  const text=await res.text();
+  return text?JSON.parse(text):null;
+}
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const nav=document.getElementById('nav-'+name);
+  if(nav) nav.classList.add('active');
+  if(name==='clients') renderClientsList();
+  if(name==='bilans') renderBilansTable();
+  if(name==='dashboard') renderDashboard();
+}
+
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+  if(id==='modal-bilan') populateClientSelect();
+  if(id==='modal-bilan') document.getElementById('b-date').valueAsDate=new Date();
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+function showNotif(msg){
+  const n=document.getElementById('notif');
+  n.textContent=msg;n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),6000);
+}
+
+async function loadAll(){
+  showNotif('Chargement...');
+  try{
+    const cRes=await fetch(`${SUPA_URL}/rest/v1/clients?order=created_at.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}});
+    if(!cRes.ok){const t=await cRes.text();showNotif('Erreur clients: '+cRes.status+' '+t.slice(0,60));return;}
+    clients=await cRes.json()||[];
+    const bRes=await fetch(`${SUPA_URL}/rest/v1/bilans?order=date_bilan.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}});
+    if(!bRes.ok){const t=await bRes.text();showNotif('Erreur bilans: '+bRes.status+' '+t.slice(0,60));return;}
+    bilans=await bRes.json()||[];
+    showNotif(`✓ ${clients.length} client(s) chargé(s)`);
+    renderDashboard();
+  }catch(e){
+    showNotif('Erreur réseau: '+e.message.slice(0,80));
+    console.error(e);
+  }
+}
+
+// LOGO SVG as base64 for PDF
+function getLogoBase64(){
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
+    <rect width="120" height="40" fill="#0A0A0A"/>
+    <polygon points="10,8 18,8 14,20 20,20 10,36 12,24 6,24" fill="#C9A84C"/>
+    <text x="26" y="18" font-family="Arial Black,sans-serif" font-size="11" font-weight="900" fill="#C9A84C" letter-spacing="1">IMPULSE</text>
+    <text x="26" y="30" font-family="Arial,sans-serif" font-size="8" fill="#F5F0E8" letter-spacing="2">GD COACHING</text>
+  </svg>`;
+  return 'data:image/svg+xml;base64,'+btoa(svg);
+}
+
+// DASHBOARD
+function renderDashboard(){
+  document.getElementById('stat-clients').textContent=clients.length;
+  document.getElementById('stat-bilans').textContent=bilans.length;
+  const ca=clients.reduce((s,c)=>s+((c.seances_total||0)-(c.seances_restantes||0))*(c.tarif_seance||0),0);
+  const imp=clients.reduce((s,c)=>s+(c.reste_du||0),0);
+  document.getElementById('stat-ca').textContent=ca.toLocaleString('fr')+'€';
+  document.getElementById('stat-impayes').textContent=imp.toLocaleString('fr')+'€';
+
+  // BIRTHDAY ALERTS
+  const bdayAlerts=checkBirthdays();
+  bdayAlerts.forEach(b=>{
+    const msg=b.days===0?`🎂 Anniversaire aujourd'hui — ${b.name} !`:b.days===1?`🎂 Anniversaire demain — ${b.name} !`:`🎂 Anniversaire dans ${b.days} jours — ${b.name}`;
+    const div=document.createElement('div');
+    div.onclick=()=>showClientDetail(b.id);
+    div.style.cssText='background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius);padding:10px 14px;margin-bottom:8px;font-size:12px;cursor:pointer;color:var(--gold);';
+    div.textContent=msg;
+    document.getElementById('dashboard-alerts').prepend(div);
+  });
+
+  // ALERTS — séances faibles ou impayés
+  const alerts=[];
+  clients.forEach(c=>{
+    const rest=c.seances_restantes??0;
+    if(rest<=0) alerts.push({type:'red',msg:`🔴 ${c.prenom} ${c.nom} — plus aucune séance restante`,id:c.id});
+    else if(rest<=2) alerts.push({type:'amber',msg:`🟡 ${c.prenom} ${c.nom} — seulement ${rest} séance${rest>1?'s':''} restante${rest>1?'s':''}`,id:c.id});
+    if((c.reste_du||0)>0) alerts.push({type:'red',msg:`💰 ${c.prenom} ${c.nom} — ${c.reste_du}€ impayé`,id:c.id});
+  });
+  const alertEl=document.getElementById('dashboard-alerts');
+  if(alerts.length){
+    alertEl.innerHTML=alerts.slice(0,3).map(a=>{
+      const bg=a.type==='red'?'rgba(232,80,80,0.08)':'rgba(232,160,32,0.08)';
+      const border=a.type==='red'?'rgba(232,80,80,0.2)':'rgba(232,160,32,0.2)';
+      const color=a.type==='red'?'var(--red)':'var(--amber)';
+      return '<div onclick="showClientDetail(\''+a.id+'\')" style="background:'+bg+';border:1px solid '+border+';border-radius:var(--radius);padding:10px 14px;margin-bottom:8px;font-size:12px;cursor:pointer;color:'+color+'">'+a.msg+'</div>';
+    }).join('');
+  } else { alertEl.innerHTML=''; }
+
+  const el=document.getElementById('dashboard-list');
+  if(!clients.length){el.innerHTML='<div class="empty-state"><div class="icon">◎</div><p>Aucun client pour l\'instant</p></div>';return;}
+  el.innerHTML=clients.slice(0,4).map(c=>{
+    const init=(c.prenom[0]+c.nom[0]).toUpperCase();
+    const rest=c.seances_restantes??c.seances_total??0;
+    const total=c.seances_total||1;
+    const pct=Math.round(Math.max(0,Math.min(100,(rest/total)*100)));
+    const barColor=rest<=0?'var(--red)':rest<=2?'var(--amber)':'var(--green)';
+    const paid=(c.reste_du||0)>0?`<span class="badge badge-red">${c.reste_du}€ dû</span>`:'<span class="badge badge-green">À jour</span>';
+    const lastBilan=bilans.filter(b=>b.client_id===c.id).sort((a,b)=>new Date(b.date_bilan)-new Date(a.date_bilan))[0];
+    const lastBilanStr=lastBilan?new Date(lastBilan.date_bilan).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):' — ';
+    return `<div class="client-card" style="cursor:pointer" onclick="showClientDetail('${c.id}')">
+      <div class="client-card-header">
+        <div class="avatar-sm">${init}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:500;font-size:14px">${c.prenom} ${c.nom}</div>
+          <div style="font-size:11px;color:var(--white-dim);margin-top:1px">${c.objectif||'—'} · Dernier bilan : ${lastBilanStr}</div>
+        </div>
+        ${paid}
+      </div>
+      <div style="margin-top:4px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--white-dim);margin-bottom:4px">
+          <span>Séances restantes</span><span style="color:${barColor};font-weight:500">${rest} / ${total}</span>
+        </div>
+        <div style="height:4px;background:rgba(245,240,232,0.08);border-radius:2px">
+          <div style="height:4px;width:${pct}%;background:${barColor};border-radius:2px;transition:width 0.4s"></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function clientCardHTML(c,mini=false){
+  const init=(c.prenom[0]+c.nom[0]).toUpperCase();
+  const rest=c.seances_restantes??c.seances_total??0;
+  const sb=rest<=0?'badge-red':rest<=2?'badge-amber':'badge-green';
+  const paid=(c.reste_du||0)>0?`<span class="badge badge-red">${c.reste_du}€ dû</span>`:'<span class="badge badge-green">À jour</span>';
+  return `<div class="client-card">
+    <div class="client-card-header">
+      <div class="avatar-sm">${init}</div>
+      <div style="flex:1">
+        <div style="font-weight:500;font-size:14px">${c.prenom} ${c.nom}</div>
+        <div style="font-size:11px;color:var(--white-dim);margin-top:2px">${c.objectif||'—'}</div>
+      </div>
+      ${paid}
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <span class="badge ${sb}">${rest} séance${rest>1?'s':''} restante${rest>1?'s':''}</span>
+      ${!mini?`<div class="client-card-actions">
+        <button class="btn-seance" onclick="confirmerSeance('${c.id}')">✓ Séance réalisée</button>
+        <button class="btn btn-outline" style="font-size:11px;padding:5px 10px" onclick="openBilanForClient('${c.id}')">+ Bilan</button>
+        <button class="btn btn-outline" style="font-size:11px;padding:5px 10px" onclick="editClient('${c.id}')">✎ Modifier</button>
+        <button class="btn btn-red" onclick="showClientDetail('${c.id}')">📊 Historique</button>
+        <button class="btn btn-red" style="border-color:rgba(232,80,80,0.3)" onclick="deleteClient('${c.id}')">✕</button>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+
+// CLIENTS LIST
+function renderClientsList(){
+  const el=document.getElementById('clients-list');
+  if(!clients.length){el.innerHTML='<div class="empty-state"><div class="icon">◎</div><p>Aucun client enregistré</p></div>';return;}
+  el.innerHTML=clients.map(c=>clientCardHTML(c,false)).join('');
+}
+
+// BILANS TABLE
+function renderBilansTable(){
+  const tbody=document.getElementById('bilans-table');
+  if(!bilans.length){tbody.innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="icon">◎</div><p>Aucun bilan</p></div></td></tr>';return;}
+  tbody.innerHTML=bilans.map(b=>{
+    const client=clients.find(c=>c.id===b.client_id);
+    const name=client?`${client.prenom} ${client.nom}`:'—';
+    const date=b.date_bilan?new Date(b.date_bilan).toLocaleDateString('fr-FR'):'—';
+    const imcBadge=b.imc?(b.imc<=24.9?'badge-normal':b.imc<=29.9?'badge-amber':'badge-red'):'';
+    return `<tr>
+      <td style="font-weight:500">${name}</td>
+      <td style="color:var(--white-dim)">${date}</td>
+      <td>${b.poids?b.poids+' kg':'—'}</td>
+      <td>${b.imc?`<span class="badge ${imcBadge}">${b.imc}</span>`:'—'}</td>
+      <td><button class="btn btn-gold" style="font-size:11px;padding:5px 10px" onclick="generatePDF('${b.id}')">↓ PDF</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// CLIENT DETAIL — historique + graphique
+function showClientDetail(clientId){
+  const client=clients.find(c=>c.id===clientId);
+  if(!client) return;
+  const clientBilans=bilans.filter(b=>b.client_id===clientId).sort((a,b)=>new Date(a.date_bilan)-new Date(b.date_bilan));
+  const init=(client.prenom[0]+client.nom[0]).toUpperCase();
+
+  const bilanRows=clientBilans.length?clientBilans.map(b=>{
+    const date=new Date(b.date_bilan).toLocaleDateString('fr-FR');
+    return `<tr>
+      <td>${date}</td>
+      <td>${b.poids||'—'} kg</td>
+      <td>${b.masse_musculaire_maigre||'—'} kg</td>
+      <td>${b.graisse_corporelle||'—'}%</td>
+      <td><button class="btn btn-gold" style="font-size:10px;padding:4px 8px" onclick="generatePDF('${b.id}')">PDF</button></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--white-dim);padding:20px">Aucun bilan</td></tr>';
+
+  document.getElementById('client-detail-content').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div class="avatar-sm" style="width:48px;height:48px;font-size:16px">${init}</div>
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px">${client.prenom} ${client.nom}</div>
+        <div style="font-size:12px;color:var(--white-dim)">${client.objectif||'—'} · ${client.seances_restantes??0} séances restantes</div>
+      </div>
+    </div>
+    ${clientBilans.length>=2?`
+    <div class="card" style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px;color:var(--gold)">Évolution du poids & masse musculaire</div>
+      <div class="chart-wrap"><canvas id="evolution-chart"></canvas></div>
+    </div>`:''}
+    <div class="card">
+      <div style="font-size:13px;font-weight:500;margin-bottom:14px">Historique des bilans</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Poids</th><th>Masse musc.</th><th>Graisse</th><th></th></tr></thead>
+          <tbody>${bilanRows}</tbody>
+        </table>
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-gold" style="font-size:12px" onclick="openBilanForClient('${clientId}');showPage('clients')">+ Nouveau bilan</button>
+      <button class="btn btn-outline" style="font-size:12px" onclick="editClient('${clientId}')">✎ Modifier client</button>
+    </div>
+  `;
+
+  showPage('client-detail');
+
+  if(clientBilans.length>=2){
+    setTimeout(()=>{
+      const ctx=document.getElementById('evolution-chart');
+      if(!ctx) return;
+      if(chartInstance) chartInstance.destroy();
+      const labels=clientBilans.map(b=>new Date(b.date_bilan).toLocaleDateString('fr-FR',{month:'short',day:'numeric'}));
+      chartInstance=new Chart(ctx,{
+        type:'line',
+        data:{
+          labels,
+          datasets:[
+            {label:'Poids (kg)',data:clientBilans.map(b=>b.poids||null),borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,0.1)',tension:0.4,pointRadius:4,pointBackgroundColor:'#C9A84C'},
+            {label:'Masse musc. (kg)',data:clientBilans.map(b=>b.masse_musculaire_maigre||null),borderColor:'#4CAF7D',backgroundColor:'rgba(76,175,125,0.1)',tension:0.4,pointRadius:4,pointBackgroundColor:'#4CAF7D'},
+          ]
+        },
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'rgba(245,240,232,0.6)',font:{size:11}}}},scales:{x:{ticks:{color:'rgba(245,240,232,0.4)',font:{size:10}},grid:{color:'rgba(245,240,232,0.04)'}},y:{ticks:{color:'rgba(245,240,232,0.4)',font:{size:10}},grid:{color:'rgba(245,240,232,0.04)'}}}}
+      });
+    },100);
+  }
+}
+
+// CONFIRMER SÉANCE
+async function confirmerSeance(clientId){
+  const client=clients.find(c=>c.id===clientId);
+  if(!client) return;
+  const rest=client.seances_restantes??client.seances_total??0;
+  if(rest<=0){showNotif('Aucune séance restante !');return;}
+  if(!confirm(`Confirmer la séance de ${client.prenom} ${client.nom} ? (${rest} → ${rest-1} séances restantes)`)) return;
+  try{
+    await supaFetch('clients','PATCH',{seances_restantes:rest-1},`?id=eq.${clientId}`);
+    client.seances_restantes=rest-1;
+    renderDashboard();
+    renderClientsList();
+    showNotif(`✓ Séance comptabilisée — ${rest-1} restante${rest-1>1?'s':''}`);
+  }catch(e){showNotif('Erreur : '+e.message);}
+}
+
+// EDIT CLIENT
+function editClient(clientId){
+  const c=clients.find(cl=>cl.id===clientId);
+  if(!c) return;
+  document.getElementById('modal-client-title').textContent='Modifier client';
+  document.getElementById('c-id').value=c.id;
+  document.getElementById('c-prenom').value=c.prenom||'';
+  document.getElementById('c-nom').value=c.nom||'';
+  document.getElementById('c-ddn').value=c.date_naissance||'';
+  document.getElementById('c-sexe').value=c.sexe||'';
+  document.getElementById('c-tel').value=c.telephone||'';
+  document.getElementById('c-email').value=c.email||'';
+  document.getElementById('c-taille').value=c.taille||'';
+  document.getElementById('c-objectif').value=c.objectif||'';
+  document.getElementById('c-abo').value=c.abonnement||'';
+  document.getElementById('c-seances').value=c.seances_total||'';
+  document.getElementById('c-tarif').value=c.tarif_seance||'';
+  document.getElementById('c-du').value=c.reste_du||0;
+  document.getElementById('c-patho').value=c.pathologies||'';
+  document.getElementById('c-notes').value=c.notes||'';
+  document.getElementById('c-adresse').value=c.adresse||'';
+  document.getElementById('c-piece-id').value=c.piece_identite||'';
+  document.getElementById('c-combi').value=c.taille_combi||'';
+  document.getElementById('c-debut-abo').value=c.debut_abonnement||'';
+  document.getElementById('c-reglement').value=c.mode_reglement||'';
+  document.getElementById('c-prix-pack').value=c.prix_pack||'';
+  document.getElementById('modal-client').classList.add('open');
+}
+
+function resetClientModal(){
+  document.getElementById('modal-client-title').textContent='Nouveau client';
+  document.getElementById('c-id').value='';
+  document.getElementById('c-prenom').value='';
+  document.getElementById('c-nom').value='';
+  document.getElementById('c-ddn').value='';
+  document.getElementById('c-sexe').value='';
+  document.getElementById('c-tel').value='';
+  document.getElementById('c-email').value='';
+  document.getElementById('c-taille').value='';
+  document.getElementById('c-objectif').value='';
+  document.getElementById('c-abo').value='';
+  document.getElementById('c-seances').value='';
+  document.getElementById('c-tarif').value='';
+  document.getElementById('c-du').value='0';
+  document.getElementById('c-patho').value='';
+  document.getElementById('c-notes').value='';
+  document.getElementById('c-adresse').value='';
+  document.getElementById('c-piece-id').value='';
+  document.getElementById('c-combi').value='';
+  document.getElementById('c-debut-abo').value='';
+  document.getElementById('c-reglement').value='';
+  document.getElementById('c-prix-pack').value='';
+}
+
+// SAVE CLIENT (create or update)
+async function saveClient(e){
+  e.preventDefault();
+  const id=document.getElementById('c-id').value;
+  const seances=parseInt(document.getElementById('c-seances').value)||0;
+  const data={
+    prenom:document.getElementById('c-prenom').value,
+    nom:document.getElementById('c-nom').value,
+    date_naissance:document.getElementById('c-ddn').value||null,
+    sexe:document.getElementById('c-sexe').value||null,
+    telephone:document.getElementById('c-tel').value||null,
+    email:document.getElementById('c-email').value||null,
+    taille:parseFloat(document.getElementById('c-taille').value)||null,
+    objectif:document.getElementById('c-objectif').value||null,
+    abonnement:document.getElementById('c-abo').value||null,
+    seances_total:seances,
+    tarif_seance:parseFloat(document.getElementById('c-tarif').value)||null,
+    reste_du:parseFloat(document.getElementById('c-du').value)||0,
+    pathologies:document.getElementById('c-patho').value||null,
+    notes:document.getElementById('c-notes').value||null,
+    adresse:document.getElementById('c-adresse').value||null,
+    piece_identite:document.getElementById('c-piece-id').value||null,
+    taille_combi:document.getElementById('c-combi').value||null,
+    debut_abonnement:document.getElementById('c-debut-abo').value||null,
+    mode_reglement:document.getElementById('c-reglement').value||null,
+    prix_pack:parseFloat(document.getElementById('c-prix-pack').value)||null,
+  };
+  try{
+    if(id){
+      // UPDATE
+      await supaFetch('clients','PATCH',data,`?id=eq.${id}`);
+      const idx=clients.findIndex(c=>c.id===id);
+      if(idx>=0) clients[idx]={...clients[idx],...data};
+      showNotif('✓ Client modifié');
+    } else {
+      // CREATE
+      data.seances_restantes=seances;
+      const res=await supaFetch('clients','POST',data);
+      clients.unshift(res[0]);
+      showNotif('✓ Client enregistré');
+    }
+    closeModal('modal-client');
+    resetClientModal();
+    renderDashboard();
+    renderClientsList();
+  }catch(err){showNotif('Erreur : '+err.message);}
+}
+
+function openBilanForClient(clientId){
+  openModal('modal-bilan');
+  setTimeout(()=>{document.getElementById('b-client').value=clientId;},100);
+}
+
+function populateClientSelect(){
+  const sel=document.getElementById('b-client');
+  sel.innerHTML='<option value="">Sélectionner...</option>'+clients.map(c=>`<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join('');
+}
+
+function calcIMC(){
+  const poids=parseFloat(document.getElementById('b-poids').value);
+  const clientId=document.getElementById('b-client').value;
+  const client=clients.find(c=>c.id===clientId);
+  if(poids&&client&&client.taille){
+    const h=client.taille/100;
+    document.getElementById('b-imc').value=(poids/(h*h)).toFixed(1);
+  }
+}
+
+async function saveBilan(e){
+  e.preventDefault();
+  const data={
+    client_id:document.getElementById('b-client').value,
+    date_bilan:document.getElementById('b-date').value,
+    poids:parseFloat(document.getElementById('b-poids').value)||null,
+    imc:parseFloat(document.getElementById('b-imc').value)||null,
+    graisse_corporelle:parseFloat(document.getElementById('b-gr-corp').value)||null,
+    eau_corporelle:parseFloat(document.getElementById('b-eau').value)||null,
+    muscles_squelettiques:parseFloat(document.getElementById('b-musc-skel').value)||null,
+    os:parseFloat(document.getElementById('b-os').value)||null,
+    proteines:parseFloat(document.getElementById('b-prot').value)||null,
+    muscles:parseFloat(document.getElementById('b-musc').value)||null,
+    graisse_viscerale:parseFloat(document.getElementById('b-gr-visc').value)||null,
+    graisse_sous_cutanee:parseFloat(document.getElementById('b-gr-sous').value)||null,
+    masse_musculaire_maigre:parseFloat(document.getElementById('b-masse-musc').value)||null,
+    age_corps:parseInt(document.getElementById('b-age-corps').value)||null,
+    somatotype:document.getElementById('b-somato').value||null,
+    rmc:parseInt(document.getElementById('b-rmc').value)||null,
+    amr:parseInt(document.getElementById('b-amr').value)||null,
+    seances_semaine:parseInt(document.getElementById('b-seances-sem').value)||null,
+    type_entrainement:document.getElementById('b-type-entr').value||null,
+    analyse_bilan:document.getElementById('b-analyse').value||null,
+    recommandations:document.getElementById('b-recomm').value||null,
+    suggestions_ems:document.getElementById('b-ems').value||null,
+    prochain_bilan:document.getElementById('b-prochain').value||null,
+  };
+  try{
+    const res=await supaFetch('bilans','POST',data);
+    bilans.unshift(res[0]);
+    closeModal('modal-bilan');
+    showNotif('✓ Bilan enregistré');
+    generatePDF(res[0].id);
+    e.target.reset();
+  }catch(err){showNotif('Erreur : '+err.message);}
+}
+
+async function deleteClient(id){
+  if(!confirm('Supprimer ce client et tous ses bilans ?')) return;
+  await supaFetch('clients','DELETE',null,`?id=eq.${id}`);
+  clients=clients.filter(c=>c.id!==id);
+  bilans=bilans.filter(b=>b.client_id!==id);
+  renderDashboard();renderClientsList();
+  showNotif('Client supprimé');
+}
+
+async function genAIRecommandations(){
+  const clientId=document.getElementById('b-client').value;
+  const client=clients.find(c=>c.id===clientId);
+  if(!clientId){showNotif('Sélectionnez un client d\'abord');return;}
+  if(!ANTH_KEY){
+    document.getElementById('b-recomm').value=generateFallbackRecommandations(client,{
+      grCorp:document.getElementById('b-gr-corp').value,
+      masseMusc:document.getElementById('b-masse-musc').value,
+      grVisc:document.getElementById('b-gr-visc').value
+    });
+    showNotif('Recommandations générées');return;
+  }
+  const loader=document.getElementById('ai-loader');
+  loader.classList.add('show');
+  const prompt=`Tu es un coach sportif expert. Génère des recommandations personnalisées courtes (4-5 points) pour ce client en français, tutoiement, ton motivant.
+Client: ${client?client.prenom+' '+client.nom:'Client'}, objectif: ${client?.objectif||'non précisé'}.
+Mesures: poids ${document.getElementById('b-poids').value}kg, IMC ${document.getElementById('b-imc').value}, graisse ${document.getElementById('b-gr-corp').value}%, masse musc. ${document.getElementById('b-masse-musc').value}kg, graisse viscérale ${document.getElementById('b-gr-visc').value}, RMC ${document.getElementById('b-rmc').value}kcal.
+Réponds uniquement avec les recommandations en bullet points, sans titre.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTH_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(data.content&&data.content[0]) document.getElementById('b-recomm').value=data.content[0].text;
+    showNotif('✦ Recommandations générées par IA');
+  }catch(err){
+    document.getElementById('b-recomm').value=generateFallbackRecommandations(client,{grCorp:document.getElementById('b-gr-corp').value,masseMusc:document.getElementById('b-masse-musc').value,grVisc:document.getElementById('b-gr-visc').value});
+    showNotif('Recommandations générées');
+  }
+  loader.classList.remove('show');
+}
+
+function generateFallbackRecommandations(client,data){
+  const lines=[];
+  if(parseFloat(data.grVisc)>10) lines.push('• Réduire la graisse viscérale : privilégie le cardio HIIT 2-3x/semaine et limite les sucres raffinés.');
+  lines.push('• Continue le renforcement musculaire — maintiens l\'effort sur les abdos et le haut du corps.');
+  lines.push('• Hydratation : vise 1,5-2L d\'eau par jour pour optimiser la récupération.');
+  lines.push('• Sommeil ≥ 7-8h/nuit et apport protéique suffisant pour soutenir la prise de muscle.');
+  lines.push('• Suivi régulier : on ajuste le programme à chaque bilan pour maximiser tes résultats !');
+  return lines.join('\n');
+}
+
+// FILTER CLIENTS
+function filterClients(query){
+  const q=query.toLowerCase().trim();
+  const el=document.getElementById('clients-list');
+  if(!q){ renderClientsList(); return; }
+  const filtered=clients.filter(c=>
+    (c.prenom+' '+c.nom).toLowerCase().includes(q)||
+    (c.telephone||'').includes(q)||
+    (c.objectif||'').toLowerCase().includes(q)||
+    (c.email||'').toLowerCase().includes(q)
+  );
+  if(!filtered.length){ el.innerHTML='<div class="empty-state"><div class="icon">◎</div><p>Aucun client trouvé</p></div>'; return; }
+  el.innerHTML=filtered.map(c=>clientCardHTML(c,false)).join('');
+}
+
+// BIRTHDAY ALERTS
+function checkBirthdays(){
+  const today=new Date();
+  const alerts=[];
+  clients.forEach(c=>{
+    if(!c.date_naissance) return;
+    const ddn=new Date(c.date_naissance+'T12:00:00');
+    const nextBday=new Date(today.getFullYear(),ddn.getMonth(),ddn.getDate());
+    if(nextBday<today) nextBday.setFullYear(today.getFullYear()+1);
+    const diff=Math.ceil((nextBday-today)/(1000*60*60*24));
+    if(diff<=7) alerts.push({name:c.prenom+' '+c.nom,days:diff,id:c.id});
+  });
+  return alerts;
+}
+
+// EMS SUGGESTIONS IA
+async function genEMSSuggestions(){
+  const clientId=document.getElementById('b-client').value;
+  const client=clients.find(c=>c.id===clientId);
+  if(!clientId){showNotif('Sélectionnez un client d\'abord');return;}
+  const loader=document.getElementById('ai-loader-ems');
+  loader.classList.add('show');
+  const objectif=client?.objectif||'remise en forme';
+  const grCorp=document.getElementById('b-gr-corp').value;
+  const masseMusc=document.getElementById('b-masse-musc').value;
+  const fallback=[
+    '• Exercices excentriques : squats excentriques lents (4 sec descente), curl biceps excentrique — focus sur la résistance en phase de retour.',
+    '• Travail fractionné : 30s effort intense / 30s récupération × 8 séries — cardio HIIT adapté au profil EMS.',
+    '• Gainage et sangle abdominale : planche frontale 3×45s, gainage latéral 3×30s chaque côté.',
+    '• Renforcement haut du corps : rowing, développé épaules, triceps — 3 séries × 12 répétitions.',
+    '• Étirements post-séance : 10 min de stretching global pour optimiser la récupération musculaire.',
+  ].join('\n');
+  if(!ANTH_KEY){ document.getElementById('b-ems').value=fallback; loader.classList.remove('show'); showNotif('Suggestions EMS générées'); return; }
+  try{
+    const prompt=`Tu es un expert en électrostimulation musculaire (EMS). Génère 4-5 suggestions d\'exercices EMS personnalisés pour ce client en français, tutoiement, ton motivant.
+Client: ${client?.prenom} ${client?.nom}, objectif: ${objectif}.
+Données: graisse corporelle ${grCorp}%, masse musculaire ${masseMusc}kg.
+Propose des exercices excentriques, fractionné, et suggestions personnalisées selon la progression. Réponds uniquement avec les suggestions en bullet points.`;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTH_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(data.content&&data.content[0]) document.getElementById('b-ems').value=data.content[0].text;
+    showNotif('⚡ Suggestions EMS générées !');
+  }catch(err){ document.getElementById('b-ems').value=fallback; showNotif('Suggestions EMS générées'); }
+  loader.classList.remove('show');
+}
+
+// PDF GENERATION — Design proche Canva Impulse GD
+async function generatePDF(bilanId){
+  try{
+    const bilan=bilans.find(b=>b.id===bilanId);
+    if(!bilan){showNotif('Bilan introuvable');return;}
+    const client=clients.find(c=>c.id===bilan.client_id);
+    if(!client){showNotif('Client introuvable');return;}
+    if(!window.jspdf){showNotif('Librairie PDF non chargée');return;}
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=210,H=297;
+    const GOLD=[201,168,76],BLACK=[10,10,10],DARK=[20,18,5],WHITE=[245,240,232],GRAY=[160,150,120];
+    const GREEN=[76,175,125],RED=[220,80,80];
+    const bg=()=>{doc.setFillColor(...BLACK);doc.rect(0,0,W,H,'F');};
+    const goldRect=(x,y,w,h)=>{doc.setFillColor(...DARK);doc.setDrawColor(...GOLD);doc.setLineWidth(0.5);doc.rect(x,y,w,h,'FD');};
+    const txt=(t,x,y,size,color,style,align)=>{doc.setFont('helvetica',style||'normal');doc.setFontSize(size);doc.setTextColor(...color);doc.text(String(t),x,y,{align:align||'left'});};
+    const badgePDF=(x,y,label,type)=>{
+      const map={normal:[[15,50,30],GREEN],eleve:[[55,15,15],RED],standard:[[50,40,8],GOLD]};
+      const [bg2,fg]=map[type]||map.standard;
+      doc.setFillColor(...bg2);doc.rect(x,y-4,22,6,'F');
+      txt(label,x+11,y,6.5,fg,'bold','center');
+    };
+    const pageHeader=(subtitle)=>{
+      bg();
+      doc.setFillColor(...GOLD);doc.rect(0,0,W,1,'F');
+      doc.setFillColor(40,33,8);doc.rect(0,1,W,35,'F');
+      doc.setFillColor(...GOLD);doc.rect(0,36,W,0.5,'F');
+      txt('IMPULSE GD COACHING',W/2,16,22,GOLD,'bold','center');
+      txt('BILAN CORPOREL',W/2,26,11,WHITE,'normal','center');
+      txt(subtitle,W/2,33,8,GRAY,'normal','center');
+      txt('@impulse_gd_coaching',W-12,10,7,GOLD,'normal','right');
+      txt(new Date().toLocaleDateString('fr-FR'),W-12,17,7,GRAY,'normal','right');
+      doc.setFillColor(...GOLD);doc.rect(0,H-8,W,8,'F');
+      txt('* Les resultats peuvent varier selon l\'hydratation, le sommeil et l\'alimentation.',W/2,H-2.5,6,BLACK,'normal','center');
+    };
+
+    // PAGE 1 — IDENTITÉ
+    pageHeader("IDENTITÉ DE L'ADHÉRENT(E)");
+    goldRect(12,42,W-24,62);
+    txt("IDENTITÉ DE L'ADHÉRENT(E)",W/2,52,10,GOLD,'bold','center');
+    doc.setDrawColor(...GOLD);doc.setLineWidth(0.3);doc.line(20,55,W-20,55);
+    [['Nom & Prénom',client.prenom+' '+client.nom],['Date de naissance',client.date_naissance?new Date(client.date_naissance+'T12:00:00').toLocaleDateString('fr-FR'):'—'],['Sexe',client.sexe||'—'],['Date du bilan',new Date(bilan.date_bilan+'T12:00:00').toLocaleDateString('fr-FR')]].forEach(([k,v],i)=>{
+      txt('• '+k+' :',20,64+i*11,9,WHITE,'bold');
+      txt(v,95,64+i*11,9,GOLD,'bold');
+    });
+    goldRect(12,114,W-24,68);
+    txt('PARAMÈTRES DE BASE',W/2,124,10,GOLD,'bold','center');
+    doc.setDrawColor(...GOLD);doc.setLineWidth(0.3);doc.line(20,127,W-20,127);
+    txt('• Taille :',20,138,10,WHITE,'bold');txt(client.taille?client.taille+' cm':'—',95,138,10,GOLD,'bold');
+    txt('• Poids :',20,150,10,WHITE,'bold');txt(bilan.poids?bilan.poids+' kg':'—',95,150,10,GOLD,'bold');
+    txt('• IMC :',20,162,10,WHITE,'bold');txt(bilan.imc?String(bilan.imc):'—',95,162,10,GOLD,'bold');
+    if(bilan.imc){
+      const imc=parseFloat(bilan.imc);
+      const items=[['< 18,5 → Insuffisance pondérale',imc<18.5],['18,5 – 24,9 → Corpulence normale',imc>=18.5&&imc<=24.9],['25 – 29,9 → Surpoids',imc>=25&&imc<=29.9],['≥ 30 → Obésité',imc>=30]];
+      txt('Interprétation IMC :',20,192,9,GOLD,'bold');
+      items.forEach(([t,ok],i)=>{
+        if(ok){doc.setFillColor(...GOLD);doc.circle(17,201+i*9-2,2,'F');txt(t,22,201+i*9,9,GOLD,'bold');}
+        else{doc.setDrawColor(60,55,20);doc.circle(17,201+i*9-2,2,'D');txt(t,22,201+i*9,9,[60,55,20],'normal');}
+      });
+    }
+
+    // PAGE 2 — COMPOSITION
+    doc.addPage();pageHeader('COMPOSITION CORPORELLE');
+    goldRect(12,42,W-24,178);
+    txt('COMPOSITION CORPORELLE',W/2,52,10,GOLD,'bold','center');
+    doc.setDrawColor(...GOLD);doc.setLineWidth(0.3);doc.line(20,55,W-20,55);
+    const mesures=[
+      ['Poids',bilan.poids?bilan.poids+' kg':'—','normal'],
+      ['IMC',bilan.imc?String(bilan.imc):'—',(bilan.imc||0)<=24.9?'normal':'eleve'],
+      ['Graisse corporelle (%)',bilan.graisse_corporelle?bilan.graisse_corporelle+'%':'—',(bilan.graisse_corporelle||0)>25?'eleve':'standard'],
+      ['Eau corporelle (%)',bilan.eau_corporelle?bilan.eau_corporelle+'%':'—','standard'],
+      ['Muscles squelettiques (%)',bilan.muscles_squelettiques?bilan.muscles_squelettiques+'%':'—','standard'],
+      ['Os (%)',bilan.os?bilan.os+'%':'—','standard'],
+      ['Protéines (%)',bilan.proteines?bilan.proteines+'%':'—','standard'],
+      ['Muscles (%)',bilan.muscles?bilan.muscles+'%':'—','standard'],
+      ['Indice graisse viscérale',bilan.graisse_viscerale?String(bilan.graisse_viscerale):'—',(bilan.graisse_viscerale||0)>10?'eleve':'standard'],
+      ['Graisse sous-cutanée',bilan.graisse_sous_cutanee?bilan.graisse_sous_cutanee+' kg':'—',(bilan.graisse_sous_cutanee||0)>15?'eleve':'standard'],
+      ['Masse musc. maigre',bilan.masse_musculaire_maigre?bilan.masse_musculaire_maigre+' kg':'—','normal'],
+      ['Âge du corps',bilan.age_corps?bilan.age_corps+' ans':'—','standard'],
+      ['Somatotype',bilan.somatotype||'—','standard'],
+      ['RMC (Métabolisme base)',bilan.rmc?bilan.rmc+' Kcal':'—','normal'],
+      ['AMR (Dépense totale)',bilan.amr?bilan.amr+' Kcal':'—','normal'],
+    ];
+    mesures.forEach((m,i)=>{
+      const my=62+i*10.5;
+      doc.setFillColor(i%2===0?28:22,i%2===0?24:18,i%2===0?6:4);
+      doc.rect(14,my-5,W-28,10,'F');
+      txt(m[0],18,my,8,GRAY,'normal');
+      txt(m[1],W-50,my,8,WHITE,'bold','right');
+      badgePDF(W-45,my,m[2]==='normal'?'Normal':m[2]==='eleve'?'Élevé':'Standard',m[2]);
+    });
+
+    // PAGE 3 — ANALYSE
+    doc.addPage();pageHeader('ANALYSE DU BILAN');
+    goldRect(12,42,W-24,210);
+    txt('ANALYSE CORPORELLE',W/2,52,10,GOLD,'bold','center');
+    doc.setDrawColor(...GOLD);doc.setLineWidth(0.3);doc.line(20,55,W-20,55);
+    if(bilan.recommandations){
+      const recommLines=doc.splitTextToSize(bilan.recommandations,W-40);
+      txt(recommLines,18,68,9.5,WHITE,'normal');
+    } else {
+      txt('Aucune recommandation saisie pour ce bilan.',W/2,130,10,GRAY,'normal','center');
+    }
+
+    // PAGE 4 — PLAN D'ACTION
+    doc.addPage();pageHeader("PLAN D'ACTION ET CONSEILS");
+    goldRect(12,42,W-24,125);
+    txt("PLAN D'ACTION ET CONSEILS",W/2,52,10,GOLD,'bold','center');
+    doc.setDrawColor(...GOLD);doc.setLineWidth(0.3);doc.line(20,55,W-20,55);
+    [['Séances / semaine',bilan.seances_semaine?bilan.seances_semaine+' séance'+(bilan.seances_semaine>1?'s':''):'—'],["Type d'entraînement",bilan.type_entrainement||'—'],['Prochain bilan dans',bilan.prochain_bilan||'—']].forEach(([k,v],i)=>{
+      const ay=68+i*22;
+      doc.setFillColor(35,28,6);doc.rect(16,ay-7,W-32,14,'F');
+      txt('• '+k,20,ay,9,GOLD,'bold');
+      txt(doc.splitTextToSize(v,W-80)[0],W-18,ay,9,WHITE,'normal','right');
+    });
+    txt('Recommandations complémentaires :',20,142,9,GOLD,'bold');
+    doc.setDrawColor(...GOLD);doc.setLineWidth(0.2);doc.line(20,145,W-20,145);
+    ['Maintenir une hydratation optimale (1,5-2L eau/jour).','Sommeil ≥ 7-8h par nuit, limiter les sucres rapides.','Rester actif au quotidien (marche, escaliers, déplacements à pied).'].forEach((c,i)=>txt('• '+c,20,154+i*10,8.5,WHITE,'normal'));
+
+    doc.save('Bilan_'+client.prenom+'_'+client.nom+'_'+bilan.date_bilan+'.pdf');
+    showNotif('✓ PDF généré et téléchargé !');
+  }catch(err){
+    showNotif('Erreur PDF : '+err.message.slice(0,60));
+    console.error('PDF error:',err);
+  }
+}
+
+// Override openModal pour reset le form client
+const _openModal=openModal;
+window.openModal=function(id){
+  if(id==='modal-client') resetClientModal();
+  _openModal(id);
+};
+
+loadAll();
+</script>
+</body>
+</html>
